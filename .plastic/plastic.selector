@@ -1,0 +1,4 @@
+repository "1CAB@OneCab@cloud"
+  path "/"
+    br "/main"
+    co "/main"
