@@ -18,7 +18,7 @@ public class Heart : MonoBehaviour
 
         if (playerComponent != null)
         {
-            playerComponent.AddHealth(healthAddition);
+            playerComponent.Heal(healthAddition);
 
             Destroy(gameObject);
         }

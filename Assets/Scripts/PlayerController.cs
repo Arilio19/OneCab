@@ -5,53 +5,52 @@ using UnityEngine.UI;
 
 public enum PlayerNumber { One, Two }
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamageable, IKillable
 {
-    public PlayerNumber playerNumber;
+    [SerializeField] PlayerNumber playerNumber;
 
-    public float speed = 8f;
-    public float health;
+    [Header("Physics")]
+    [SerializeField] float speed = 8f;
+    [SerializeField] float health = 100f;
+    [SerializeField] float projectileFireCooldown;
 
-    public GameObject projectilePrefab;
-    public Transform projectileFireLocation;
+    [Header("References")]
+    [SerializeField] GameObject projectilePrefab;
+    [SerializeField] Transform projectileFireLocation;
+    [SerializeField] GameObject weaponParent;
+    [SerializeField] Image healthUI;
 
-    public GameObject weaponParent;
-    public float weaponRotationDuration;
-
-    public Color projectileColor;
-    //public Ease weaponRotationEase;
-
-    public float projectileFireCooldown;
-
-    public Image healthUI;
-
-    Rigidbody2D rb;
-
+    [Header("Visuals")]
+    [SerializeField] Color projectileColor;   
+    
+    //Cached Variables
+    Rigidbody2D rigidbody;
     bool isFiring;
+    string horizontalInputString;
+    string verticalInputString;
+    string actionInputString;
 
-    Vector2 velocity;
+    private void Awake() => rigidbody = GetComponent<Rigidbody2D>();
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-
         StartCoroutine(FireProjectiles());
+
+        InitialiseInputStrings();
     }
 
-    float cooldownTimer = 0f;
+    void InitialiseInputStrings()
+    {
+        int playerNumber = (int)this.playerNumber + 1;
+        horizontalInputString = "Horizontal" + playerNumber;
+        verticalInputString = "Vertical" + playerNumber;
+        actionInputString = "Fire" + playerNumber;
+    }
+
     void Update()
     {
-        if (playerNumber == PlayerNumber.One)
-        {
-            if (Input.GetButtonDown("Fire1")) isFiring = true;
-            if (Input.GetButtonUp("Fire1")) isFiring = false;
-        }
-        else
-        {
-            if (Input.GetButtonDown("Fire2")) isFiring = true;
-            if (Input.GetButtonUp("Fire2")) isFiring = false;
-        }
-        
+        if (Input.GetButtonDown(actionInputString)) isFiring = true;
+        if (Input.GetButtonUp(actionInputString)) isFiring = false;        
 
         UpdateWeaponRotation();
     }
@@ -71,56 +70,43 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void UpdateWeaponRotation()
+    void UpdateWeaponRotation()
     {
-        if (playerNumber == PlayerNumber.One)
-        {
-            if (Input.GetAxisRaw("Vertical1") >= 1) weaponParent.transform.localEulerAngles = Vector3.zero;
-            if (Input.GetAxisRaw("Vertical1") <= -1) weaponParent.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
-            if (Input.GetAxisRaw("Horizontal1") >= 1) weaponParent.transform.localEulerAngles = new Vector3(0f, 0f, -90f);
-            if (Input.GetAxisRaw("Horizontal1") <= -1) weaponParent.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
-        }
-        else
-        {
-            if (Input.GetAxisRaw("Vertical2") >= 1) weaponParent.transform.localEulerAngles = Vector3.zero;
-            if (Input.GetAxisRaw("Vertical2") <= -1) weaponParent.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
-            if (Input.GetAxisRaw("Horizontal2") >= 1) weaponParent.transform.localEulerAngles = new Vector3(0f, 0f, -90f);
-            if (Input.GetAxisRaw("Horizontal2") <= -1) weaponParent.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
-        }
+        if (Input.GetAxisRaw(verticalInputString) >= 1) weaponParent.transform.localEulerAngles = Vector3.zero;
+        if (Input.GetAxisRaw(verticalInputString) <= -1) weaponParent.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
+        if (Input.GetAxisRaw(horizontalInputString) >= 1) weaponParent.transform.localEulerAngles = new Vector3(0f, 0f, -90f);
+        if (Input.GetAxisRaw(horizontalInputString) <= -1) weaponParent.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
     }
 
-    private void HandleMovementInput()
+    void FixedUpdate()
     {
-
+        Vector2 velocity = rigidbody.velocity;
+        velocity = new Vector2(Input.GetAxis(horizontalInputString) * speed * Time.fixedDeltaTime, Input.GetAxis(verticalInputString) * speed * Time.fixedDeltaTime);
+        rigidbody.velocity = velocity;
     }
 
-    private void FixedUpdate()
-    {
-        Vector2 velocity = rb.velocity;
+    public void AddForce(Vector2 force) => rigidbody.AddForce(force);
 
-        if (playerNumber == PlayerNumber.One) velocity = new Vector2(Input.GetAxis("Horizontal1") * speed * Time.fixedDeltaTime, Input.GetAxis("Vertical1") * speed * Time.fixedDeltaTime);
-        else velocity = new Vector2(Input.GetAxis("Horizontal2") * speed * Time.fixedDeltaTime, Input.GetAxis("Vertical2") * speed * Time.fixedDeltaTime);
-
-        rb.velocity = velocity;
-    }
-
-    public void AddForce(Vector2 force) => rb.AddForce(force);
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        var projectileComponent = collision.gameObject.GetComponent<Projectile>();
-
-        if (projectileComponent != null) health -= projectileComponent.damage;
-
-        healthUI.fillAmount = health / 100;
-
-        if (health <= 0) Destroy(gameObject);
-    }
-
-    public void AddHealth(int health)
+    public void Heal(int health)
     {
         this.health += health;
 
-        healthUI.fillAmount = this.health / 100;
+        OnHealthChanged();
     }
+
+    public void Damage(int damage)
+    {
+        health -= damage;
+
+        OnHealthChanged();
+    }
+
+    void OnHealthChanged()
+    {
+        healthUI.fillAmount = health / 100;
+
+        if (health <= 0) Kill();
+    }
+
+    public void Kill() => Destroy(gameObject);
 }
