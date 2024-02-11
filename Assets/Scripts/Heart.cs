@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Heart : MonoBehaviour
+public class Heart : Mechanic
 {
-    public int healthAddition;
-    public float rotationSpeed;
+    [SerializeField] int healthAddition;
+    [SerializeField] float rotationSpeed;
+    [SerializeField] AudioClip collectSound;
 
     private void Update()
     {
@@ -19,6 +20,8 @@ public class Heart : MonoBehaviour
         if (playerComponent != null)
         {
             playerComponent.Heal(healthAddition);
+
+            AudioSource.PlayClipAtPoint(collectSound, Camera.main.transform.position);
 
             Destroy(gameObject);
         }

@@ -9,8 +9,6 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: ConveorBeltMAT
   m_Shader: {fileID: -6465566751694194690, guid: 715b2f2c006494ccebbbef9b5ba4a27e, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -19,10 +17,13 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _SampleTexture2D_fafae77661624ceeb32907b71d20d98f_Texture_1:
+        m_Texture: {fileID: 2800000, guid: a32e90e3d9e8c4885855c6e7aba2c4dd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SampleTexture2D_fafae77661624ceeb32907b71d20d98f_Texture_1_Texture2D:
         m_Texture: {fileID: 2800000, guid: a32e90e3d9e8c4885855c6e7aba2c4dd, type: 3}
         m_Scale: {x: 1, y: 1}

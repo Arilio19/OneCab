@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HeartSpawner : MonoBehaviour
+public class HeartSpawner : Mechanic
 {
     public GameObject heartPrefab;
 
